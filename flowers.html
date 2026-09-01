@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Выбор букета 💐</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a0a2e 0%, #4a1a6b 50%, #8b2f5c 100%);
+            min-height: 100vh; color: #fff; overflow-x: hidden; position: relative;
+        }
+        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .star { position: absolute; width: 2px; height: 2px; background: white; border-radius: 50%; animation: twinkle 3s infinite; }
+        @keyframes twinkle { 0%,100%{opacity:0.2} 50%{opacity:1} }
+        .content { position: relative; z-index: 1; padding: 24px 20px 40px; max-width: 420px; margin: 0 auto; }
+        .header { text-align: center; padding: 40px 0 20px; animation: fadeInDown 1s ease-out; }
+        .header h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; margin: 0 0 12px;
+            background: linear-gradient(90deg, #ffd700, #ff8c69, #ffd700); background-size: 200% auto;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shine 3s linear infinite; }
+        @keyframes shine { to { background-position: 200% center; } }
+        .header p { font-size: 16px; opacity: 0.85; margin: 0; font-weight: 300; }
+        .heart-divider { text-align: center; font-size: 24px; margin: 16px 0; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
+
+        .flower-card {
+            background: rgba(255,255,255,0.08); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; padding: 18px 20px; margin-bottom: 14px;
+            cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 16px;
+            animation: fadeInUp 0.5s ease-out backwards; -webkit-user-select: none; user-select: none;
+        }
+        .flower-card:nth-child(1){animation-delay:0.1s} .flower-card:nth-child(2){animation-delay:0.2s}
+        .flower-card:nth-child(3){animation-delay:0.3s} .flower-card:nth-child(4){animation-delay:0.4s}
+        .flower-card:nth-child(5){animation-delay:0.5s} .flower-card:nth-child(6){animation-delay:0.6s}
+        .flower-card:active { transform: scale(0.98); }
+        .flower-card.selected { background: rgba(255,215,0,0.2); border-color: #ffd700; box-shadow: 0 0 20px rgba(255,215,0,0.3); }
+        .flower-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
+        .flower-icon.red { background: linear-gradient(135deg, #ff6b6b, #c0392b); }
+        .flower-icon.pink { background: linear-gradient(135deg, #f8a5c2, #e056fd); }
+        .flower-icon.white { background: linear-gradient(135deg, #f5f6fa, #dcdde1); }
+        .flower-icon.mix { background: linear-gradient(135deg, #ff9ff3, #feca57, #ff6b6b); }
+        .flower-icon.surprise { background: linear-gradient(135deg, #a29bfe, #6c5ce7); }
+        .flower-icon.custom { background: linear-gradient(135deg, #ffd700, #ff8c69); }
+        .flower-text h3 { font-size: 16px; font-weight: 600; margin: 0 0 3px; }
+        .flower-text p { font-size: 13px; opacity: 0.7; margin: 0; }
+
+        .custom-textarea {
+            width: 100%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px; padding: 14px 16px; color: #fff; font-size: 15px; margin-top: 10px;
+            outline: none; display: none; font-family: 'Inter', sans-serif; -webkit-appearance: none;
+            min-height: 80px; resize: none;
+        }
+        .custom-textarea::placeholder { color: rgba(255,255,255,0.5); }
+        .custom-textarea:focus { border-color: #ffd700; }
+
+        .actions { margin-top: 30px; display: flex; flex-direction: column; gap: 12px; animation: fadeInUp 0.8s ease-out 0.5s backwards; }
+        .btn {
+            width: 100%; padding: 18px; border-radius: 16px; border: none; font-size: 16px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease; font-family: 'Inter', sans-serif;
+            -webkit-appearance: none; -webkit-user-select: none; user-select: none;
+        }
+        .btn-primary { background: linear-gradient(135deg, #ffd700, #ff8c69); color: #1a0a2e; box-shadow: 0 4px 20px rgba(255,215,0,0.4); }
+        .btn-primary:active { transform: scale(0.97); }
+        .btn-secondary { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.15); }
+        .btn-secondary:active { background: rgba(255,255,255,0.15); }
+
+        @keyframes fadeInDown { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+
+    <div class="content">
+        <div class="header">
+            <h1>Какой букет тебе по душе?</h1>
+            <p>Хочу подарить тебе цветы, которые ты любишь 💐</p>
+        </div>
+
+        <div class="heart-divider">🌸</div>
+
+        <div class="flower-card" data-value="roses" onclick="selectFlower(this)">
+            <div class="flower-icon red">🌹</div>
+            <div class="flower-text">
+                <h3>Красные розы</h3>
+                <p>Классика романтики и страсти</p>
+            </div>
+        </div>
+
+        <div class="flower-card" data-value="peonies" onclick="selectFlower(this)">
+            <div class="flower-icon pink">🌺</div>
+            <div class="flower-text">
+                <h3>Пионы</h3>
+                <p>Нежность, изысканность и утончённость</p>
+            </div>
+        </div>
+
+        <div class="flower-card" data-value="tulips" onclick="selectFlower(this)">
+            <div class="flower-icon white">🌷</div>
+            <div class="flower-text">
+                <h3>Тюльпаны</h3>
+                <p>Весеннее настроение и свежесть</p>
+            </div>
+        </div>
+
+        <div class="flower-card" data-value="mixed" onclick="selectFlower(this)">
+            <div class="flower-icon mix">💐</div>
+            <div class="flower-text">
+                <h3>Смешанный букет</h3>
+                <p>Разноцветная композиция от флориста</p>
+            </div>
+        </div>
+
+        <div class="flower-card" data-value="surprise" onclick="selectFlower(this)">
+            <div class="flower-icon surprise">🎁</div>
+            <div class="flower-text">
+                <h3>Сюрприз от тебя</h3>
+                <p>Я выберу сам — доверься мне</p>
+            </div>
+        </div>
+
+        <div class="flower-card" data-value="custom" onclick="selectFlower(this)">
+            <div class="flower-icon custom">💡</div>
+            <div class="flower-text">
+                <h3>Свой вариант</h3>
+                <p>Расскажи, какие цветы любишь</p>
+            </div>
+        </div>
+        <textarea class="custom-textarea" id="customFlower" placeholder="Напиши, какие цветы тебе нравятся..."></textarea>
+
+        <div class="actions">
+            <button class="btn btn-primary" onclick="nextStep()">Дальше 💕</button>
+            <button class="btn btn-secondary" onclick="skipFlowers()">Пропустить</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedFlower = null;
+
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 60; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            star.style.width = Math.random() * 3 + 1 + 'px';
+            star.style.height = star.style.width;
+            starsContainer.appendChild(star);
+        }
+
+        function selectFlower(card) {
+            document.querySelectorAll('.flower-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedFlower = card.dataset.value;
+            const custom = document.getElementById('customFlower');
+            if (selectedFlower === 'custom') {
+                custom.style.display = 'block';
+                setTimeout(() => custom.focus(), 100);
+            } else {
+                custom.style.display = 'none';
+            }
+        }
+
+        function nextStep() {
+            if (!selectedFlower) {
+                selectFlower(document.querySelector('.flower-card'));
+                return;
+            }
+            const customText = document.getElementById('customFlower').value;
+            const flowerNames = {
+                roses: 'Красные розы 🌹',
+                peonies: 'Пионы 🌺',
+                tulips: 'Тюльпаны 🌷',
+                mixed: 'Смешанный букет 💐',
+                surprise: 'Сюрприз от тебя 🎁',
+                custom: customText || 'Свой вариант 💡'
+            };
+            localStorage.setItem('date_flower', JSON.stringify({
+                choice: selectedFlower,
+                label: flowerNames[selectedFlower],
+                customText: customText
+            }));
+            window.location.href = 'who-pays.html';
+        }
+
+        function skipFlowers() {
+            localStorage.setItem('date_flower', JSON.stringify({
+                choice: 'skipped',
+                label: 'Пропущено',
+                customText: ''
+            }));
+            window.location.href = 'who-pays.html';
+        }
+    </script>
+</body>
+</html>
