@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Кто платит? 💳</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a0a2e 0%, #4a1a6b 50%, #8b2f5c 100%);
+            min-height: 100vh; color: #fff; overflow-x: hidden; position: relative;
+        }
+        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .star { position: absolute; width: 2px; height: 2px; background: white; border-radius: 50%; animation: twinkle 3s infinite; }
+        @keyframes twinkle { 0%,100%{opacity:0.2} 50%{opacity:1} }
+        .content { position: relative; z-index: 1; padding: 24px 20px 40px; max-width: 420px; margin: 0 auto; }
+        .header { text-align: center; padding: 40px 0 20px; animation: fadeInDown 1s ease-out; }
+        .header h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; margin: 0 0 12px;
+            background: linear-gradient(90deg, #ffd700, #ff8c69, #ffd700); background-size: 200% auto;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shine 3s linear infinite; }
+        @keyframes shine { to { background-position: 200% center; } }
+        .header p { font-size: 16px; opacity: 0.85; margin: 0; font-weight: 300; }
+        .heart-divider { text-align: center; font-size: 24px; margin: 16px 0; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
+
+        .pay-card {
+            background: rgba(255,255,255,0.08); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; padding: 28px 20px; margin-bottom: 16px;
+            cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 16px;
+            animation: fadeInUp 0.6s ease-out backwards; -webkit-user-select: none; user-select: none;
+            text-align: left;
+        }
+        .pay-card:nth-child(1){animation-delay:0.1s} .pay-card:nth-child(2){animation-delay:0.2s}
+        .pay-card:active { transform: scale(0.98); }
+        .pay-card.selected { background: rgba(255,215,0,0.2); border-color: #ffd700; box-shadow: 0 0 20px rgba(255,215,0,0.3); }
+        .pay-card.disabled { opacity: 0.4; pointer-events: none; }
+        .pay-icon { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
+        .pay-icon.dima { background: linear-gradient(135deg, #4ecdc4, #44a08d); }
+        .pay-icon.ritulya { background: linear-gradient(135deg, #ff6b6b, #ee5a5a); }
+        .pay-text h3 { font-size: 18px; font-weight: 600; margin: 0 0 4px; }
+        .pay-text p { font-size: 14px; opacity: 0.7; margin: 0; }
+
+        .actions { margin-top: 30px; display: flex; flex-direction: column; gap: 12px; animation: fadeInUp 0.8s ease-out 0.3s backwards; }
+        .btn {
+            width: 100%; padding: 18px; border-radius: 16px; border: none; font-size: 16px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease; font-family: 'Inter', sans-serif;
+            -webkit-appearance: none; -webkit-user-select: none; user-select: none;
+        }
+        .btn-primary { background: linear-gradient(135deg, #ffd700, #ff8c69); color: #1a0a2e; box-shadow: 0 4px 20px rgba(255,215,0,0.4); }
+        .btn-primary:active { transform: scale(0.97); }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: none;
+            align-items: center; justify-content: center; z-index: 100; padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: linear-gradient(135deg, #2d1b4e, #4a1a6b); border-radius: 24px; padding: 32px 24px;
+            text-align: center; max-width: 320px; width: 100%; border: 1px solid rgba(255,255,255,0.15);
+            animation: modalIn 0.4s ease-out;
+        }
+        @keyframes modalIn { from{transform:scale(0.8);opacity:0} to{transform:scale(1);opacity:1} }
+        .modal-emoji { font-size: 48px; margin-bottom: 16px; animation: bounce 1s infinite; }
+        @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+        .modal h2 { font-family: 'Playfair Display', serif; font-size: 22px; margin: 0 0 12px; }
+        .modal p { font-size: 15px; opacity: 0.85; margin: 0 0 24px; line-height: 1.5; }
+        .modal-btn {
+            background: linear-gradient(135deg, #ffd700, #ff8c69); color: #1a0a2e; border: none;
+            padding: 14px 32px; border-radius: 14px; font-size: 15px; font-weight: 600; cursor: pointer;
+            font-family: 'Inter', sans-serif; -webkit-appearance: none;
+        }
+        .modal-btn:active { transform: scale(0.97); }
+
+        .loader {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 200;
+            align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+        }
+        .loader.active { display: flex; }
+        .loader-spinner {
+            width: 48px; height: 48px; border: 3px solid rgba(255,215,0,0.3);
+            border-top-color: #ffd700; border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loader p { font-size: 15px; opacity: 0.9; }
+
+        @keyframes fadeInDown { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+
+    <div class="content">
+        <div class="header">
+            <h1>Кто платит за свидание?</h1>
+            <p>Сделай свой выбор, но помни — я настоящий джентльмен 😌</p>
+        </div>
+
+        <div class="heart-divider">💳</div>
+
+        <div class="pay-card" id="cardDima" data-value="dima" onclick="selectPayer(this)">
+            <div class="pay-icon dima">🤴</div>
+            <div class="pay-text">
+                <h3>Дима</h3>
+                <p>Настоящий джентльмен всё оплатит</p>
+            </div>
+        </div>
+
+        <div class="pay-card" id="cardRitulya" data-value="ritulya" onclick="selectPayer(this)">
+            <div class="pay-icon ritulya">👸</div>
+            <div class="pay-text">
+                <h3>Ритуля</h3>
+                <p>Ну... попробуем 😅</p>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-primary" onclick="finish()">Подтвердить выбор 💕</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="ritulyaModal">
+        <div class="modal">
+            <div class="modal-emoji">😏</div>
+            <h2>Ну уж нет!</h2>
+            <p>Ритуля платить буду я 😌<br>Ты — моя принцесса, а принцессы не платят</p>
+            <button class="modal-btn" onclick="forceDima()">Ладно, Дима платит 💘</button>
+        </div>
+    </div>
+
+    <div class="loader" id="loader">
+        <div class="loader-spinner"></div>
+        <p>Отправляю ответы...</p>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════════
+        //  НАСТРОЙКА: зарегистрируйся на https://formspree.io/register
+        //  Создай форму, скопируй endpoint вида https://formspree.io/f/xnqkvevp
+        //  Вставь его сюда ↓↓↓
+        // ═══════════════════════════════════════════════════════════════
+        const FORMSPREE_ENDPOINT = 'https://formspree.io/f/ВАШ_ID';
+        // ═══════════════════════════════════════════════════════════════
+
+        let selectedPayer = null;
+
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 60; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            star.style.width = Math.random() * 3 + 1 + 'px';
+            star.style.height = star.style.width;
+            starsContainer.appendChild(star);
+        }
+
+        function selectPayer(card) {
+            const value = card.dataset.value;
+
+            if (value === 'ritulya') {
+                document.getElementById('ritulyaModal').classList.add('active');
+                return;
+            }
+
+            document.querySelectorAll('.pay-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedPayer = value;
+        }
+
+        function forceDima() {
+            document.getElementById('ritulyaModal').classList.remove('active');
+            const dimaCard = document.getElementById('cardDima');
+            const ritulyaCard = document.getElementById('cardRitulya');
+            document.querySelectorAll('.pay-card').forEach(c => c.classList.remove('selected'));
+            dimaCard.classList.add('selected');
+            ritulyaCard.classList.add('disabled');
+            selectedPayer = 'dima';
+        }
+
+        async function finish() {
+            if (!selectedPayer) {
+                selectPayer(document.getElementById('cardDima'));
+                return;
+            }
+
+            const dateData = JSON.parse(localStorage.getItem('date_choice') || '{}');
+            const flowerData = JSON.parse(localStorage.getItem('date_flower') || '{}');
+
+            const payerNames = { dima: 'Дима 🤴', ritulya: 'Ритуля 👸' };
+
+            document.getElementById('loader').classList.add('active');
+
+            if (!FORMSPREE_ENDPOINT.includes('ВАШ_ID')) {
+                try {
+                    await fetch(FORMSPREE_ENDPOINT, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            _subject: '💕 Ответы на приглашение на свидание!',
+                            date_choice: dateData.label || '—',
+                            flower_choice: flowerData.label || '—',
+                            payer: payerNames[selectedPayer] || '—',
+                            custom_date: dateData.customText || '—',
+                            custom_flower: flowerData.customText || '—',
+                            time: new Date().toLocaleString('ru-RU')
+                        })
+                    });
+                } catch (e) {
+                    console.log('Formspree error:', e);
+                }
+            }
+
+            localStorage.setItem('date_complete', JSON.stringify({
+                date: dateData,
+                flower: flowerData,
+                payer: selectedPayer,
+                payerLabel: payerNames[selectedPayer],
+                time: new Date().toLocaleString('ru-RU')
+            }));
+
+            setTimeout(() => {
+                window.location.href = 'thanks.html';
+            }, 1000);
+        }
+
+        document.getElementById('ritulyaModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                document.getElementById('ritulyaModal').classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
