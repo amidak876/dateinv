@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Спасибо! 💕</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a0a2e 0%, #4a1a6b 50%, #8b2f5c 100%);
+            min-height: 100vh; color: #fff; overflow: hidden; position: relative;
+        }
+        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .star { position: absolute; width: 2px; height: 2px; background: white; border-radius: 50%; animation: twinkle 3s infinite; }
+        @keyframes twinkle { 0%,100%{opacity:0.2} 50%{opacity:1} }
+        #confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+        .content {
+            position: relative; z-index: 5; min-height: 100vh; display: flex;
+            flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 40px 24px; animation: fadeIn 1.2s ease-out;
+        }
+        .success-emoji { font-size: 72px; margin-bottom: 20px; animation: popIn 0.6s ease-out; }
+        @keyframes popIn { from{transform:scale(0)} to{transform:scale(1)} }
+        .content h1 {
+            font-family: 'Playfair Display', serif; font-size: 30px; font-weight: 700;
+            margin-bottom: 16px; background: linear-gradient(90deg, #ffd700, #ff8c69, #ffd700);
+            background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite;
+        }
+        @keyframes shine { to { background-position: 200% center; } }
+        .content .subtitle { font-size: 17px; opacity: 0.9; margin-bottom: 8px; font-weight: 400; line-height: 1.5; }
+        .content .desc { font-size: 15px; opacity: 0.7; max-width: 320px; line-height: 1.6; margin-bottom: 32px; }
+        .summary-box {
+            background: rgba(255,255,255,0.08); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; padding: 20px 24px;
+            max-width: 340px; width: 100%; margin-bottom: 24px; animation: fadeInUp 0.8s ease-out 0.4s backwards;
+            text-align: left;
+        }
+        .summary-box h3 { font-size: 14px; opacity: 0.6; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+        .summary-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 15px; }
+        .summary-item:last-child { margin-bottom: 0; }
+        .summary-item .dot { width: 8px; height: 8px; border-radius: 50%; background: #ffd700; flex-shrink: 0; }
+        .hearts-row { font-size: 24px; animation: pulse 2s infinite; margin-top: 8px; }
+        @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    <canvas id="confetti"></canvas>
+
+    <div class="content">
+        <div class="success-emoji">🎉</div>
+        <h1>Спасибо за ответ!</h1>
+        <p class="subtitle">Твои ответы отправлены<br>лучшему мужчине на свете 💕</p>
+        <p class="desc">Он уже начинает всё планировать и с нетерпением ждёт встречи ✨</p>
+
+        <div class="summary-box" id="summaryBox" style="display:none;">
+            <h3>Твой выбор:</h3>
+            <div class="summary-item"><span class="dot"></span><span id="sumDate">—</span></div>
+            <div class="summary-item"><span class="dot"></span><span id="sumFlower">—</span></div>
+            <div class="summary-item"><span class="dot"></span><span id="sumPayer">—</span></div>
+        </div>
+
+        <div class="hearts-row">💖 💕 💗 💝 💘</div>
+    </div>
+
+    <script>
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 60; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            star.style.width = Math.random() * 3 + 1 + 'px';
+            star.style.height = star.style.width;
+            starsContainer.appendChild(star);
+        }
+
+        const completeData = JSON.parse(localStorage.getItem('date_complete') || '{}');
+        if (completeData.date && completeData.date.label) {
+            document.getElementById('summaryBox').style.display = 'block';
+            document.getElementById('sumDate').textContent = completeData.date.label;
+            document.getElementById('sumFlower').textContent = completeData.flower && completeData.flower.label ? completeData.flower.label : 'Букет не выбран';
+            document.getElementById('sumPayer').textContent = completeData.payerLabel || 'Дима платит 🤴';
+        }
+
+        const canvas = document.getElementById('confetti');
+        const ctx = canvas.getContext('2d');
+        let w, h;
+        function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+        resize();
+        window.addEventListener('resize', resize);
+
+        const colors = ['#ffd700', '#ff6b6b', '#ff8c69', '#4ecdc4', '#a18cd1', '#f093fb', '#ff69b4'];
+        const particles = [];
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * w;
+                this.y = -20;
+                this.size = Math.random() * 8 + 4;
+                this.speedY = Math.random() * 3 + 2;
+                this.speedX = (Math.random() - 0.5) * 2;
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = (Math.random() - 0.5) * 10;
+                this.opacity = 1;
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                this.rotation += this.rotationSpeed;
+                this.opacity -= 0.003;
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation * Math.PI / 180);
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = this.color;
+                ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+                ctx.restore();
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, w, h);
+            if (particles.length < 150 && Math.random() > 0.9) {
+                particles.push(new Particle());
+            }
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                particles[i].draw();
+                if (particles[i].y > h || particles[i].opacity <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        for (let i = 0; i < 30; i++) {
+            setTimeout(() => particles.push(new Particle()), i * 50);
+        }
+    </script>
+</body>
+</html>
