@@ -141,9 +141,7 @@
 
     <script>
         // ═══════════════════════════════════════════════════════════════
-        //  НАСТРОЙКА: зарегистрируйся на https://formspree.io/register
-        //  Создай форму, скопируй endpoint вида https://formspree.io/f/xnqkvevp
-        //  Вставь его сюда ↓↓↓
+        //  ТВОЙ FORMSPREE ENDPOINT
         // ═══════════════════════════════════════════════════════════════
         const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mwlkoeqp';
         // ═══════════════════════════════════════════════════════════════
@@ -198,29 +196,37 @@
 
             document.getElementById('loader').classList.add('active');
 
-            if (!FORMSPREE_ENDPOINT.includes('https://formspree.io/f/mwlkoeqp')) {
-                try {
-                    await fetch(FORMSPREE_ENDPOINT, {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            _subject: '💕 Ответы на приглашение на свидание!',
-                            date_choice: dateData.label || '—',
-                            flower_choice: flowerData.label || '—',
-                            payer: payerNames[selectedPayer] || '—',
-                            custom_date: dateData.customText || '—',
-                            custom_flower: flowerData.customText || '—',
-                            time: new Date().toLocaleString('ru-RU')
-                        })
-                    });
-                } catch (e) {
-                    console.log('Formspree error:', e);
+            // Собираем данные для отправки
+            const formData = {
+                _subject: '💕 Ответы на приглашение на свидание!',
+                date_choice: dateData.label || '—',
+                flower_choice: flowerData.label || '—',
+                payer: payerNames[selectedPayer] || '—',
+                custom_date: dateData.customText || '—',
+                custom_flower: flowerData.customText || '—',
+                time: new Date().toLocaleString('ru-RU')
+            };
+
+            try {
+                const response = await fetch(FORMSPREE_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    console.log('✅ Отправлено успешно!');
+                } else {
+                    console.log('⚠️ Formspree ответил с ошибкой:', response.status);
                 }
+            } catch (e) {
+                console.log('❌ Ошибка сети:', e);
             }
 
+            // Сохраняем локально и редиректим в любом случае
             localStorage.setItem('date_complete', JSON.stringify({
                 date: dateData,
                 flower: flowerData,
@@ -231,7 +237,7 @@
 
             setTimeout(() => {
                 window.location.href = 'thanks.html';
-            }, 1000);
+            }, 1200);
         }
 
         document.getElementById('ritulyaModal').addEventListener('click', function(e) {
