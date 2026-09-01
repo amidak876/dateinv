@@ -140,12 +140,7 @@
     </div>
 
     <script>
-        // ═══════════════════════════════════════════════════════════════
-        //  ТВОЙ FORMSPREE ENDPOINT
-        // ═══════════════════════════════════════════════════════════════
         const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mwlkoeqp';
-        // ═══════════════════════════════════════════════════════════════
-
         let selectedPayer = null;
 
         const starsContainer = document.getElementById('stars');
@@ -162,12 +157,10 @@
 
         function selectPayer(card) {
             const value = card.dataset.value;
-
             if (value === 'ritulya') {
                 document.getElementById('ritulyaModal').classList.add('active');
                 return;
             }
-
             document.querySelectorAll('.pay-card').forEach(c => c.classList.remove('selected'));
             card.classList.add('selected');
             selectedPayer = value;
@@ -191,39 +184,39 @@
 
             const dateData = JSON.parse(localStorage.getItem('date_choice') || '{}');
             const flowerData = JSON.parse(localStorage.getItem('date_flower') || '{}');
-
             const payerNames = { dima: 'Дима 🤴', ritulya: 'Ритуля 👸' };
 
             document.getElementById('loader').classList.add('active');
 
-            // Собираем данные для отправки
-            const formData = {
-                _subject: '💕 Ответы на приглашение на свидание!',
-                date_choice: dateData.label || '—',
-                flower_choice: flowerData.label || '—',
-                payer: payerNames[selectedPayer] || '—',
-                custom_date: dateData.customText || '—',
-                custom_flower: flowerData.customText || '—',
-                time: new Date().toLocaleString('ru-RU')
-            };
+            // Создаём FormData — Formspree лучше принимает именно его
+            const formData = new FormData();
+            formData.append('_subject', '💕 Ответы на приглашение на свидание!');
+            formData.append('date_choice', dateData.label || '—');
+            formData.append('flower_choice', flowerData.label || '—');
+            formData.append('payer', payerNames[selectedPayer] || '—');
+            formData.append('custom_date', dateData.customText || '—');
+            formData.append('custom_flower', flowerData.customText || '—');
+            formData.append('time', new Date().toLocaleString('ru-RU'));
 
             try {
                 const response = await fetch(FORMSPREE_ENDPOINT, {
                     method: 'POST',
+                    body: formData,
                     headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
+                        'Accept': 'application/json'
+                    }
                 });
 
+                const result = await response.json();
+                console.log('Formspree ответ:', result);
+
                 if (response.ok) {
-                    console.log('✅ Отправлено успешно!');
+                    console.log('✅ Успешно отправлено!');
                 } else {
-                    console.log('⚠️ Formspree ответил с ошибкой:', response.status);
+                    console.log('⚠️ Ошибка:', result);
                 }
             } catch (e) {
-                console.log('❌ Ошибка сети:', e);
+                console.log('❌ Сетевая ошибка:', e);
             }
 
             // Сохраняем локально и редиректим в любом случае
